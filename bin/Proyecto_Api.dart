@@ -1,10 +1,10 @@
+// ignore: file_names
 import 'dart:io';
 import 'package:mysql1/mysql1.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
- main() async {
- 
+main() async {
   var settings = ConnectionSettings(
     host: 'localhost',
     port: 3306,
@@ -12,17 +12,20 @@ import 'dart:convert';
     db: 'miapp_db',
   );
 
-  var conn = await MySqlConnection.connect(settings);
+  late MySqlConnection conn;
+
+  try {
+    conn = await MySqlConnection.connect(settings);
 
     await conn.query('''
       CREATE TABLE IF NOT EXISTS usuarios (
         idusuario INT AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR(50),
-        password VARCHAR(10)
+        contraseña VARCHAR(10)
       )
     ''');
   } catch (e) {
-    print("Error creando tabla: $e");
+    print("Error conectando o creando tabla: $e");
     return;
   }
 
@@ -41,13 +44,13 @@ import 'dart:convert';
       String? pass = stdin.readLineSync();
 
       var resultado = await conn.query(
-        "SELECT * FROM usuarios WHERE nombre = '$nombre' AND password = '$pass'"
+        "SELECT * FROM usuarios WHERE nombre = ? AND password = ?",
+        [nombre, pass],
       );
 
       if (resultado.isNotEmpty) {
         print("Login correcto");
         logueado = true;
-
 
         print("1. Ver información de un Pokémon");
         stdout.write("Opción: ");
@@ -84,14 +87,16 @@ import 'dart:convert';
       String? pass = stdin.readLineSync();
 
       var existe = await conn.query(
-        "SELECT * FROM usuarios WHERE nombre = '$nombre'"
+        "SELECT * FROM usuarios WHERE nombre = ?",
+        [nombre],
       );
 
       if (existe.isNotEmpty) {
         print("El usuario ya existe.");
       } else {
         await conn.query(
-          "INSERT INTO usuarios (nombre, password) VALUES ('$nombre', '$pass')"
+          "INSERT INTO usuarios (nombre, password) VALUES (?, ?)",
+          [nombre, pass],
         );
         print("Usuario registrado.");
       }
