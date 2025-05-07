@@ -53,6 +53,7 @@ main() async {
         logueado = true;
 
         print("1. Ver información de un Pokémon");
+        print("2. Comparar dos Pokémon");
         stdout.write("Opción: ");
         String? sub = stdin.readLineSync();
 
@@ -73,6 +74,42 @@ main() async {
             } else {
               print("Pokémon no encontrado.");
             }
+          }
+        } else if (sub == "2") {
+          stdout.write("Primer Pokémon: ");
+          String? poke1 = stdin.readLineSync();
+          stdout.write("Segundo Pokémon: ");
+          String? poke2 = stdin.readLineSync();
+
+          if (poke1 != null && poke2 != null && poke1.isNotEmpty && poke2.isNotEmpty) {
+            var url1 = "https://pokeapi.co/api/v2/pokemon/${poke1.toLowerCase()}";
+            var url2 = "https://pokeapi.co/api/v2/pokemon/${poke2.toLowerCase()}";
+
+            var resp1 = await http.get(Uri.parse(url1));
+            var resp2 = await http.get(Uri.parse(url2));
+
+            if (resp1.statusCode == 200 && resp2.statusCode == 200) {
+              var datos1 = jsonDecode(resp1.body);
+              var datos2 = jsonDecode(resp2.body);
+
+              var ataque1 = datos1['stats'][1]['base_stat']; // normalmente "attack"
+              var ataque2 = datos2['stats'][1]['base_stat'];
+
+              print("${datos1['name']} tiene ataque: $ataque1");
+              print("${datos2['name']} tiene ataque: $ataque2");
+
+              if (ataque1 > ataque2) {
+                print("${datos1['name']} ganaría el combate.");
+              } else if (ataque2 > ataque1) {
+                print("${datos2['name']} ganaría el combate.");
+              } else {
+                print("Empate en ataque.");
+              }
+            } else {
+              print("Uno o ambos Pokémon no fueron encontrados.");
+            }
+          } else {
+            print("Nombres no válidos.");
           }
         }
 
@@ -108,3 +145,4 @@ main() async {
 
   await conn.close();
 }
+
