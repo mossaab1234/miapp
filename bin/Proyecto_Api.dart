@@ -1,14 +1,15 @@
 // ignore: file_names
-import 'dart:io';
-import 'package:mysql1/mysql1.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import "dart:io";
+import "package:mysql1/mysql1.dart";
+import "package:http/http.dart" as http;
+import "dart:convert";
+
 main() async {
   var settings = ConnectionSettings(
-    host: 'localhost',
+    host: "localhost",
     port: 3306,
-    user: 'root',
-    db: 'miapp_db',
+    user: "root",
+    db: "miapp_db",
   );
 
   late MySqlConnection conn;
@@ -16,13 +17,13 @@ main() async {
   try {
     conn = await MySqlConnection.connect(settings);
 
-    await conn.query('''
+    await conn.query("""
       CREATE TABLE IF NOT EXISTS usuarios (
         idusuario INT AUTO_INCREMENT PRIMARY KEY,
         nombre VARCHAR(50),
         contraseña VARCHAR(10)
       )
-    ''');
+    """);
   } catch (e) {
     print("Error conectando o creando tabla: $e");
     return;
@@ -53,6 +54,7 @@ main() async {
 
         print("1. Ver información de un Pokémon");
         print("2. Comparar dos Pokémon");
+        print("3. Ver descripción de un Pokémon");
         stdout.write("Opción: ");
         String? sub = stdin.readLineSync();
 
@@ -74,6 +76,7 @@ main() async {
               print("Pokémon no encontrado.");
             }
           }
+
         } else if (sub == "2") {
           stdout.write("Primer Pokémon: ");
           String? poke1 = stdin.readLineSync();
@@ -91,8 +94,8 @@ main() async {
               var datos1 = jsonDecode(resp1.body);
               var datos2 = jsonDecode(resp2.body);
 
-              var ataque1 = datos1['stats'][1]['base_stat']; // normalmente "attack"
-              var ataque2 = datos2['stats'][1]['base_stat'];
+              var ataque1 = datos1["stats"][1]["base_stat"];
+              var ataque2 = datos2["stats"][1]["base_stat"];
 
               print("${datos1['name']} tiene ataque: $ataque1");
               print("${datos2['name']} tiene ataque: $ataque2");
@@ -110,6 +113,35 @@ main() async {
           } else {
             print("Nombres no válidos.");
           }
+
+        } else if (sub == "3") {
+          stdout.write("Nombre del Pokémon: ");
+          String? poke = stdin.readLineSync();
+
+          if (poke != null && poke.isNotEmpty) {
+            var url = "https://pokeapi.co/api/v2/pokemon-species/${poke.toLowerCase()}";
+            var resp = await http.get(Uri.parse(url));
+
+            if (resp.statusCode == 200) {
+              var datos = jsonDecode(resp.body);
+
+              var descripciones = datos["flavor_text_entries"] as List;
+              var descripcion = descripciones.firstWhere(
+                (entry) => entry["language"]["name"] == "es",
+                orElse: () => null,
+              );
+
+              if (descripcion != null) {
+                print("Descripción: ${descripcion["flavor_text"].replaceAll("\n", " ").replaceAll("\f", " ")}");
+              } else {
+                print("No se encontró una descripción en español.");
+              }
+            } else {
+              print("Pokémon no encontrado.");
+            }
+          }
+        } else {
+          print("Opción no válida.");
         }
 
       } else {
@@ -144,4 +176,3 @@ main() async {
 
   await conn.close();
 }
-
