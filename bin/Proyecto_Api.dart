@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:mysql1/mysql1.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 main() async {
   var settings = ConnectionSettings(
     host: 'localhost',
