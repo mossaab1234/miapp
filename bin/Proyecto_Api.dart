@@ -1,4 +1,5 @@
 // ignore: file_names
+//En este fichero esta todo el codigo 
 import "dart:io";
 import "package:mysql1/mysql1.dart";
 import "package:http/http.dart" as http;
