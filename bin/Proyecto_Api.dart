@@ -1,4 +1,5 @@
 // ignore: file_names
+//En este fichero esta todo el codigo 
 import "dart:io";
 import "package:mysql1/mysql1.dart";
 import "package:http/http.dart" as http;
@@ -11,7 +12,6 @@ main() async {
     user: "root",
     db: "miapp_db",
   );
-
   late MySqlConnection conn;
 
   try {
@@ -86,20 +86,16 @@ main() async {
           if (poke1 != null && poke2 != null && poke1.isNotEmpty && poke2.isNotEmpty) {
             var url1 = "https://pokeapi.co/api/v2/pokemon/${poke1.toLowerCase()}";
             var url2 = "https://pokeapi.co/api/v2/pokemon/${poke2.toLowerCase()}";
-
             var resp1 = await http.get(Uri.parse(url1));
             var resp2 = await http.get(Uri.parse(url2));
 
             if (resp1.statusCode == 200 && resp2.statusCode == 200) {
               var datos1 = jsonDecode(resp1.body);
               var datos2 = jsonDecode(resp2.body);
-
               var ataque1 = datos1["stats"][1]["base_stat"];
               var ataque2 = datos2["stats"][1]["base_stat"];
-
               print("${datos1['name']} tiene ataque: $ataque1");
               print("${datos2['name']} tiene ataque: $ataque2");
-
               if (ataque1 > ataque2) {
                 print("${datos1['name']} ganaría el combate.");
               } else if (ataque2 > ataque1) {
